@@ -1,55 +1,56 @@
 package sistematsmbfoa;
 
-import com.adriangarcia.metaheuristics.tsmbfoa.Configurator;
-import com.adriangarcia.metaheuristics.tsmbfoa.Problem;
-import com.adriangarcia.metaheuristics.tsmbfoa.RunTsmbfoa;
-import com.adriangarcia.cnop.*;
+import com.garcialopez.cnops.*;
+import com.garcialopez.metaheuristic.tsmbfoa.TSMBFOA;
+import com.garcialopez.optimizationmodel.CNOP;
 import java.awt.Color;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.NumberFormat;
-import java.util.Arrays;
+import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.Timer;
 
-
 /**
- * 
+ *
  * @author José Adrian
  */
-public class MainUI extends JFrame implements Runnable{
+public class MainUI extends JFrame implements Runnable {
 
-    private int posicion;
-    private Problem problema;
-    private Configurator configuracionAuxiliar;
-    private String[] nombresCECC2006, nombresCECC2010;        
-    
-    private Timer tiempo;    
+    private int indexSelect = 0;
+    private CNOP cnop;
+    private TSMBFOA tsmbfoa;
+
+    //revisar-------------------
+    private Timer tiempo;
     int execution, count;
-    
-    
+
     Thread h1;
-    Toast toast; 
-    
+    Toast toast;
+    //revisar-------------------
+
+    @SuppressWarnings("unchecked")
     public MainUI() {
-        initComponents();                          
-        this.setExtendedState(this.MAXIMIZED_BOTH);                   
-                
-        
-        this.nombresCECC2006 = new String[21];
-        this.nombresCECC2010 = new String[18];
-        this.generarNombreCEC2006();
-        this.generarNombreCEC2010();
-        this.posicion = 0;
+        initComponents();
         this.setLocationRelativeTo(null);
-        //this.setExtendedState(MainUI.MAXIMIZED_BOTH);
-        this.cargarProblemaOptimizacion(0);
-        
-        
-        
-        
+        this.setExtendedState(MainUI.MAXIMIZED_BOTH);
+        //mostramos en el combobox de areas las que hay
+
+        this.boxStudyArea.removeAllItems();
+        this.boxStudyArea.addItem("Mechanical Engineering");
+        this.boxStudyArea.addItem("Chemistry");
+        this.boxStudyArea.addItem("CEC2006 problems");
+        this.boxStudyArea.addItem("User defined");
+
+        this.boxStudyArea.setSelectedIndex(0);
+
+        this.showCNOPs(this.indexSelect);
+
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -59,6 +60,7 @@ public class MainUI extends JFrame implements Runnable{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         grupoDefinidoParametro = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
@@ -67,20 +69,14 @@ public class MainUI extends JFrame implements Runnable{
         progreso = new javax.swing.JProgressBar();
         lblRunning = new javax.swing.JLabel();
         btnResults = new javax.swing.JButton();
-        btnCleaner = new javax.swing.JButton();
         btnStop = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
-        jSeparator2 = new javax.swing.JSeparator();
-        jSeparator3 = new javax.swing.JSeparator();
         jLabel2 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
-        boxAreaEstudio = new javax.swing.JComboBox();
+        boxStudyArea = new javax.swing.JComboBox();
         jLabel7 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        boxProblemaOptimizacion = new javax.swing.JComboBox();
-        radioRecomendada = new javax.swing.JRadioButton();
-        radioDefinida = new javax.swing.JRadioButton();
+        boxCnops = new javax.swing.JComboBox();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         spinnerExecution = new javax.swing.JSpinner();
@@ -99,8 +95,9 @@ public class MainUI extends JFrame implements Runnable{
         jLabel24 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
-        jButton4 = new javax.swing.JButton();
         jSeparator4 = new javax.swing.JSeparator();
+        radioRecomendada = new javax.swing.JRadioButton();
+        radioDefinida = new javax.swing.JRadioButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         jPanel4 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
@@ -125,7 +122,6 @@ public class MainUI extends JFrame implements Runnable{
         jLabel4 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
@@ -140,15 +136,16 @@ public class MainUI extends JFrame implements Runnable{
         btnStart.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
         btnStart.setForeground(new java.awt.Color(255, 0, 0));
         btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/iniciar24.png"))); // NOI18N
+        btnStart.setText("Run");
         btnStart.setToolTipText("START ALGORITHM ");
         btnStart.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        btnStart.setBorderPainted(false);
         btnStart.setContentAreaFilled(false);
-        btnStart.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        btnStart.setEnabled(false);
+        btnStart.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnStart.setFocusCycleRoot(true);
         btnStart.setFocusPainted(false);
-        btnStart.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnStart.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnStart.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/img/iniciar32.png"))); // NOI18N
+        btnStart.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnStartActionPerformed(evt);
@@ -164,57 +161,42 @@ public class MainUI extends JFrame implements Runnable{
         btnResults.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
         btnResults.setForeground(new java.awt.Color(0, 0, 255));
         btnResults.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultado24.png"))); // NOI18N
+        btnResults.setText("Results");
         btnResults.setToolTipText("RESULTS");
         btnResults.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        btnResults.setBorderPainted(false);
         btnResults.setContentAreaFilled(false);
-        btnResults.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnResults.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnResults.setEnabled(false);
+        btnResults.setFocusCycleRoot(true);
         btnResults.setFocusPainted(false);
-        btnResults.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnResults.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnResults.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/img/resultado32.png"))); // NOI18N
+        btnResults.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnResults.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnResultsActionPerformed(evt);
             }
         });
 
-        btnCleaner.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        btnCleaner.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/limpiar1.png"))); // NOI18N
-        btnCleaner.setToolTipText("CLEAN UP");
-        btnCleaner.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        btnCleaner.setBorderPainted(false);
-        btnCleaner.setContentAreaFilled(false);
-        btnCleaner.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        btnCleaner.setFocusPainted(false);
-        btnCleaner.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/img/limpiar.png"))); // NOI18N
-        btnCleaner.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCleanerActionPerformed(evt);
-            }
-        });
-
         btnStop.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
         btnStop.setForeground(new java.awt.Color(0, 0, 255));
         btnStop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/stop24.png"))); // NOI18N
+        btnStop.setText("Stop");
         btnStop.setToolTipText("STOP EXECUTION");
         btnStop.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        btnStop.setBorderPainted(false);
         btnStop.setContentAreaFilled(false);
-        btnStop.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        btnStop.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnStop.setEnabled(false);
+        btnStop.setFocusCycleRoot(true);
         btnStop.setFocusPainted(false);
-        btnStop.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        btnStop.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnStop.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/img/stop32.png"))); // NOI18N
+        btnStop.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnStop.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnStopActionPerformed(evt);
             }
         });
-
-        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
-
-        jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -223,49 +205,29 @@ public class MainUI extends JFrame implements Runnable{
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
-                    .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblRunning, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(33, 33, 33)
-                        .addComponent(btnCleaner, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(btnStop, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(41, 41, 41)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(btnStop, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(94, 94, 94)
+                        .addComponent(btnStart, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnResults, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(24, 24, 24)))
+                        .addComponent(btnResults, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(progreso, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblRunning, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnResults, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnStop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnStop, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
                     .addComponent(btnStart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator3)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(btnCleaner, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addGap(0, 6, Short.MAX_VALUE)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(btnResults, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addComponent(lblRunning, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progreso, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(10, 10, 10))
         );
 
         jLabel2.setFont(new java.awt.Font("Comic Sans MS", 1, 75)); // NOI18N
@@ -274,38 +236,209 @@ public class MainUI extends JFrame implements Runnable{
         jLabel2.setText("JMeta");
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
-        jScrollPane4.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), "Algorithm execution", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 16), new java.awt.Color(36, 160, 95))); // NOI18N
+        jScrollPane4.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), "Algorithm execution", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 16), new java.awt.Color(255, 204, 0))); // NOI18N
         jScrollPane4.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane4.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "First steps", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 14), new java.awt.Color(40, 79, 147))); // NOI18N
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "First steps", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 14), new java.awt.Color(51, 0, 255))); // NOI18N
 
-        boxAreaEstudio.setFont(new java.awt.Font("Montserrat", 0, 13)); // NOI18N
-        boxAreaEstudio.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "Mechanical Engineering", "Chemistry", "CEC2006 problems", "User defined" }));
-        boxAreaEstudio.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 208, 249), 1, true));
-        boxAreaEstudio.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        boxAreaEstudio.setFocusable(false);
-        boxAreaEstudio.addActionListener(new java.awt.event.ActionListener() {
+        boxStudyArea.setFont(new java.awt.Font("Montserrat", 0, 13)); // NOI18N
+        boxStudyArea.setModel(new javax.swing.DefaultComboBoxModel(new String[] { " ", "Mechanical Engineering", "Chemistry", "CEC2006 problems", "User defined" }));
+        boxStudyArea.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 208, 249), 1, true));
+        boxStudyArea.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        boxStudyArea.setFocusable(false);
+        boxStudyArea.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                boxAreaEstudioActionPerformed(evt);
+                boxStudyAreaActionPerformed(evt);
             }
         });
 
-        jLabel7.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel7.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel7.setText("STUDY AREA");
 
-        jLabel9.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel9.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel9.setText("OPTIMIZATION PROBLEM");
 
-        boxProblemaOptimizacion.setFont(new java.awt.Font("Montserrat", 0, 13)); // NOI18N
-        boxProblemaOptimizacion.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 208, 249), 1, true));
-        boxProblemaOptimizacion.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        boxProblemaOptimizacion.setFocusable(false);
-        boxProblemaOptimizacion.addActionListener(new java.awt.event.ActionListener() {
+        boxCnops.setFont(new java.awt.Font("Montserrat", 0, 13)); // NOI18N
+        boxCnops.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 208, 249), 1, true));
+        boxCnops.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        boxCnops.setFocusable(false);
+        boxCnops.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                boxProblemaOptimizacionActionPerformed(evt);
+                boxCnopsActionPerformed(evt);
             }
         });
+
+        jLabel10.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        jLabel10.setText("PARAMETER SETTING");
+
+        jLabel11.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        jLabel11.setText("NUMBER OF ITERATIONS");
+
+        spinnerExecution.setFont(new java.awt.Font("Montserrat", 0, 24)); // NOI18N
+        spinnerExecution.setModel(new javax.swing.SpinnerNumberModel(1, 1, 30, 1));
+        spinnerExecution.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 208, 249)));
+        spinnerExecution.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        spinnerExecution.setFocusable(false);
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Customize parameters", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 14), new java.awt.Color(51, 0, 255))); // NOI18N
+
+        txtBacterias.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtBacterias.setForeground(new java.awt.Color(36, 160, 95));
+        txtBacterias.setBorder(null);
+        txtBacterias.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtBacteriasKeyTyped(evt);
+            }
+        });
+
+        txtTamanoPaso.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtTamanoPaso.setForeground(new java.awt.Color(36, 160, 95));
+        txtTamanoPaso.setBorder(null);
+        txtTamanoPaso.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtTamanoPasoKeyTyped(evt);
+            }
+        });
+
+        txtCiclosQuimiotaxis.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtCiclosQuimiotaxis.setForeground(new java.awt.Color(36, 160, 95));
+        txtCiclosQuimiotaxis.setBorder(null);
+        txtCiclosQuimiotaxis.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCiclosQuimiotaxisKeyTyped(evt);
+            }
+        });
+
+        txtFactorEscalamiento.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtFactorEscalamiento.setForeground(new java.awt.Color(36, 160, 95));
+        txtFactorEscalamiento.setBorder(null);
+        txtFactorEscalamiento.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFactorEscalamientoKeyTyped(evt);
+            }
+        });
+
+        txtBacteriasReproducir.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtBacteriasReproducir.setForeground(new java.awt.Color(36, 160, 95));
+        txtBacteriasReproducir.setBorder(null);
+        txtBacteriasReproducir.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtBacteriasReproducirKeyTyped(evt);
+            }
+        });
+
+        txtFrecuenciaReproduccion.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtFrecuenciaReproduccion.setForeground(new java.awt.Color(36, 160, 95));
+        txtFrecuenciaReproduccion.setBorder(null);
+        txtFrecuenciaReproduccion.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFrecuenciaReproduccionKeyTyped(evt);
+            }
+        });
+
+        txtNumeroEvaluaciones.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
+        txtNumeroEvaluaciones.setForeground(new java.awt.Color(36, 160, 95));
+        txtNumeroEvaluaciones.setBorder(null);
+        txtNumeroEvaluaciones.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNumeroEvaluacionesKeyTyped(evt);
+            }
+        });
+
+        jLabel19.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel19.setText("Bacteria");
+
+        jLabel20.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel20.setText("Stepsize");
+
+        jLabel21.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel21.setText("Chemotoxic cycles");
+
+        jLabel22.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel22.setText("Scaling factor");
+
+        jLabel24.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel24.setText("Bacteria to reproduce");
+
+        jLabel23.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel23.setText("Reproduction frequency");
+
+        jLabel25.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
+        jLabel25.setText("Evaluations");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel25)
+                        .addGap(100, 100, 100)
+                        .addComponent(txtNumeroEvaluaciones))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel23)
+                        .addGap(11, 11, 11)
+                        .addComponent(txtFrecuenciaReproduccion))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel24)
+                        .addGap(27, 27, 27)
+                        .addComponent(txtBacteriasReproducir))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel22)
+                        .addGap(83, 83, 83)
+                        .addComponent(txtFactorEscalamiento))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel21)
+                        .addGap(49, 49, 49)
+                        .addComponent(txtCiclosQuimiotaxis))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel20)
+                        .addGap(123, 123, 123)
+                        .addComponent(txtTamanoPaso))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(90, 90, 90)
+                        .addComponent(txtBacterias, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(10, Short.MAX_VALUE))
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel19)
+                    .addComponent(txtBacterias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel20)
+                    .addComponent(txtTamanoPaso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel21)
+                    .addComponent(txtCiclosQuimiotaxis, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel22)
+                    .addComponent(txtFactorEscalamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel24)
+                    .addComponent(txtBacteriasReproducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel23)
+                    .addComponent(txtFrecuenciaReproduccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel25)
+                    .addComponent(txtNumeroEvaluaciones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        txtBacteriasReproducir.getAccessibleContext().setAccessibleDescription("");
 
         grupoDefinidoParametro.add(radioRecomendada);
         radioRecomendada.setFont(new java.awt.Font("Montserrat", 0, 13)); // NOI18N
@@ -329,238 +462,133 @@ public class MainUI extends JFrame implements Runnable{
             }
         });
 
-        jLabel10.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel10.setText("PARAMETER SETTING");
-
-        jLabel11.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel11.setText("NUMBER OF ITERATIONS");
-
-        spinnerExecution.setFont(new java.awt.Font("Montserrat", 0, 24)); // NOI18N
-        spinnerExecution.setModel(new javax.swing.SpinnerNumberModel(1, 1, 30, 1));
-        spinnerExecution.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 208, 249)));
-        spinnerExecution.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        spinnerExecution.setFocusable(false);
-
-        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Parameter fit", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 14), new java.awt.Color(40, 79, 147))); // NOI18N
-
-        txtBacterias.setEditable(false);
-        txtBacterias.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtBacterias.setForeground(new java.awt.Color(36, 160, 95));
-        txtBacterias.setBorder(null);
-
-        txtTamanoPaso.setEditable(false);
-        txtTamanoPaso.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtTamanoPaso.setForeground(new java.awt.Color(36, 160, 95));
-        txtTamanoPaso.setBorder(null);
-
-        txtCiclosQuimiotaxis.setEditable(false);
-        txtCiclosQuimiotaxis.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtCiclosQuimiotaxis.setForeground(new java.awt.Color(36, 160, 95));
-        txtCiclosQuimiotaxis.setBorder(null);
-
-        txtFactorEscalamiento.setEditable(false);
-        txtFactorEscalamiento.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtFactorEscalamiento.setForeground(new java.awt.Color(36, 160, 95));
-        txtFactorEscalamiento.setBorder(null);
-
-        txtBacteriasReproducir.setEditable(false);
-        txtBacteriasReproducir.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtBacteriasReproducir.setForeground(new java.awt.Color(36, 160, 95));
-        txtBacteriasReproducir.setBorder(null);
-
-        txtFrecuenciaReproduccion.setEditable(false);
-        txtFrecuenciaReproduccion.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtFrecuenciaReproduccion.setForeground(new java.awt.Color(36, 160, 95));
-        txtFrecuenciaReproduccion.setBorder(null);
-
-        txtNumeroEvaluaciones.setEditable(false);
-        txtNumeroEvaluaciones.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
-        txtNumeroEvaluaciones.setForeground(new java.awt.Color(36, 160, 95));
-        txtNumeroEvaluaciones.setBorder(null);
-
-        jLabel19.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel19.setText("Bacteria");
-
-        jLabel20.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel20.setText("Stepsize");
-
-        jLabel21.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel21.setText("Chemotoxic cycles");
-
-        jLabel22.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel22.setText("Scaling factor");
-
-        jLabel24.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel24.setText("Bacteria to reproduce");
-
-        jLabel23.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel23.setText("Reproduction frequency");
-
-        jLabel25.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jLabel25.setText("Evaluations");
-
-        jButton4.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/editar.png"))); // NOI18N
-        jButton4.setText("Edit");
-        jButton4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jButton4.setContentAreaFilled(false);
-        jButton4.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        jButton4.setFocusPainted(false);
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel20)
-                            .addComponent(jLabel21)
-                            .addComponent(jLabel22)
-                            .addComponent(jLabel24)
-                            .addComponent(jLabel23)
-                            .addComponent(jLabel25))
-                        .addGap(11, 11, 11)
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtBacteriasReproducir, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFactorEscalamiento, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCiclosQuimiotaxis, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTamanoPaso, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtBacterias, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFrecuenciaReproduccion)
-                            .addComponent(txtNumeroEvaluaciones))))
-                .addContainerGap())
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtBacterias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel19))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtTamanoPaso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel20))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtCiclosQuimiotaxis, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel21))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtFactorEscalamiento, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel22))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtBacteriasReproducir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel24))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtFrecuenciaReproduccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel23))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNumeroEvaluaciones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel25))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        txtBacteriasReproducir.getAccessibleContext().setAccessibleDescription("");
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator4)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGap(0, 7, Short.MAX_VALUE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel11))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(jLabel10)
-                                .addGap(31, 31, 31)
-                                .addComponent(jLabel11))
-                            .addComponent(boxAreaEstudio, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(boxProblemaOptimizacion, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(radioRecomendada, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(radioDefinida))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(spinnerExecution, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))))
-            .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(radioRecomendada)
+                                    .addComponent(radioDefinida))
+                                .addGap(170, 170, 170)
+                                .addComponent(spinnerExecution, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(11, 11, 11)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 278, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(boxStudyArea, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addGap(11, 11, 11)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 348, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(boxCnops, javax.swing.GroupLayout.PREFERRED_SIZE, 341, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(boxAreaEstudio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(6, 6, 6)
+                .addComponent(boxStudyArea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
                 .addComponent(jLabel9)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(boxProblemaOptimizacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(6, 6, 6)
+                .addComponent(boxCnops, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(11, 11, 11)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
                     .addComponent(jLabel11))
                 .addGap(11, 11, 11)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(spinnerExecution, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(radioRecomendada)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(radioDefinida)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(6, 6, 6)
+                        .addComponent(radioDefinida))
+                    .addComponent(spinnerExecution, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(6, 6, 6)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         jScrollPane4.setViewportView(jPanel3);
 
-        jScrollPane5.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), "Optimization Problem", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 16), new java.awt.Color(36, 160, 95))); // NOI18N
+        jScrollPane5.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED), "Algorithm execution", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Montserrat", 1, 16), new java.awt.Color(255, 204, 0))); // NOI18N
         jScrollPane5.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jScrollPane5.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
         jPanel4.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jPanel4.setLayout(new java.awt.GridBagLayout());
 
         jLabel12.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel12.setText("Name");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 228;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
+        jPanel4.add(jLabel12, gridBagConstraints);
 
         jLabel14.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel14.setText("Best known value");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 11;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 34, 0, 6);
+        jPanel4.add(jLabel14, gridBagConstraints);
 
         txtNombre.setEditable(false);
         txtNombre.setFont(new java.awt.Font("Consolas", 0, 16)); // NOI18N
-        txtNombre.setBorder(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 623;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
+        jPanel4.add(txtNombre, gridBagConstraints);
 
         txtValorConocido.setEditable(false);
         txtValorConocido.setFont(new java.awt.Font("Consolas", 0, 16)); // NOI18N
-        txtValorConocido.setBorder(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.ipadx = 102;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 11, 0, 6);
+        jPanel4.add(txtValorConocido, gridBagConstraints);
 
         jLabel15.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel15.setText("Objective Function");
-
-        jScrollPane1.setBorder(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 724;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(12, 6, 0, 6);
+        jPanel4.add(jLabel15, gridBagConstraints);
 
         texRestricciones.setEditable(false);
         texRestricciones.setBackground(new java.awt.Color(240, 240, 240));
@@ -571,13 +599,40 @@ public class MainUI extends JFrame implements Runnable{
         texRestricciones.setWrapStyleWord(true);
         jScrollPane1.setViewportView(texRestricciones);
 
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 848;
+        gridBagConstraints.ipady = 99;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 6);
+        jPanel4.add(jScrollPane1, gridBagConstraints);
+
         jLabel16.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel16.setText("Order of variables");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 733;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 6, 0, 6);
+        jPanel4.add(jLabel16, gridBagConstraints);
 
         jLabel17.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel17.setText("Constraints");
-
-        jScrollPane2.setBorder(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 780;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(12, 6, 0, 6);
+        jPanel4.add(jLabel17, gridBagConstraints);
 
         texFuncion.setEditable(false);
         texFuncion.setBackground(new java.awt.Color(240, 240, 240));
@@ -586,16 +641,43 @@ public class MainUI extends JFrame implements Runnable{
         texFuncion.setLineWrap(true);
         texFuncion.setRows(5);
         texFuncion.setWrapStyleWord(true);
-        texFuncion.setBorder(null);
         texFuncion.setVerifyInputWhenFocusTarget(false);
         jScrollPane2.setViewportView(texFuncion);
 
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 848;
+        gridBagConstraints.ipady = 85;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 6);
+        jPanel4.add(jScrollPane2, gridBagConstraints);
+
         jLabel18.setFont(new java.awt.Font("Montserrat", 1, 14)); // NOI18N
         jLabel18.setText("Variable range");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 755;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(11, 6, 0, 6);
+        jPanel4.add(jLabel18, gridBagConstraints);
 
         txtVariables.setEditable(false);
         txtVariables.setFont(new java.awt.Font("Consolas", 0, 16)); // NOI18N
-        txtVariables.setBorder(null);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipadx = 800;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 6);
+        jPanel4.add(txtVariables, gridBagConstraints);
 
         jScrollPane3.setBorder(null);
 
@@ -608,62 +690,18 @@ public class MainUI extends JFrame implements Runnable{
         texRangoVariable.setWrapStyleWord(true);
         jScrollPane3.setViewportView(texRangoVariable);
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 448, Short.MAX_VALUE))
-                            .addComponent(txtNombre))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtValorConocido)))
-                    .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtVariables)
-                    .addComponent(jScrollPane3))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel12)
-                    .addComponent(jLabel14))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtValorConocido, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel15)
-                .addGap(6, 6, 6)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11)
-                .addComponent(jLabel16)
-                .addGap(6, 6, 6)
-                .addComponent(txtVariables, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel17)
-                .addGap(6, 6, 6)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11)
-                .addComponent(jLabel18)
-                .addGap(6, 6, 6)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.ipadx = 850;
+        gridBagConstraints.ipady = 84;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(6, 6, 184, 6);
+        jPanel4.add(jScrollPane3, gridBagConstraints);
 
         jScrollPane5.setViewportView(jPanel4);
 
@@ -717,7 +755,7 @@ public class MainUI extends JFrame implements Runnable{
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 58, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel2)
@@ -725,7 +763,7 @@ public class MainUI extends JFrame implements Runnable{
                                 .addComponent(jLabel3))
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())
-                    .addComponent(jScrollPane5)))
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -745,23 +783,13 @@ public class MainUI extends JFrame implements Runnable{
                         .addComponent(jLabel4)))
                 .addGap(5, 5, 5)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE))
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 513, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         jMenu1.setText("File");
         jMenu1.setFont(new java.awt.Font("Montserrat", 0, 16)); // NOI18N
-
-        jMenuItem2.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
-        jMenuItem2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/limpiar1.png"))); // NOI18N
-        jMenuItem2.setText("Clean up");
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem2ActionPerformed(evt);
-            }
-        });
-        jMenu1.add(jMenuItem2);
 
         jMenuItem1.setFont(new java.awt.Font("Montserrat", 0, 14)); // NOI18N
         jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/previous.png"))); // NOI18N
@@ -825,187 +853,185 @@ public class MainUI extends JFrame implements Runnable{
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void btnResultsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResultsActionPerformed
-        Results results = new Results(this, true,this.problema, this.configuracionAuxiliar);        
+        Results results = new Results(this, true, this.cnop, this.tsmbfoa);
         results.setVisible(true);
     }//GEN-LAST:event_btnResultsActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        if (this.radioDefinida.isSelected() || this.radioRecomendada.isSelected()) {
-            
-            this.setSettingParameter();
+    private void boxCnopsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boxCnopsActionPerformed
 
-            ParameterCalibration cf = new ParameterCalibration(this, true, this,this.configuracionAuxiliar);
-            cf.setVisible(true);
-        }else{
-            this.radioDefinida.doClick();
-        }
-    }//GEN-LAST:event_jButton4ActionPerformed
+        int indexProblema = this.boxCnops.getSelectedIndex();
 
-    private void btnCleanerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCleanerActionPerformed
-        this.lblRunning.setForeground(Color.BLACK);
-        this.resultsQuick.setForeground(Color.BLACK);
-        this.lblRunning.setText("Reading");
-        this.progreso.setValue(0);
-        this.limpiarProblemaOptimizacion();
-        this.limpiarConfiguracion();
-        this.boxAreaEstudio.setSelectedIndex(0);
-        this.boxProblemaOptimizacion.removeAllItems();
-        this.boxProblemaOptimizacion.setEnabled(false);
-        this.spinnerExecution.setValue(1);
-        this.btnResults.setEnabled(false);
-        this.btnStop.setEnabled(false);
-        this.resultsQuick.setText("");
-    }//GEN-LAST:event_btnCleanerActionPerformed
+        if (indexProblema >= 0) {
+            switch (this.indexSelect) {
+                case 0:
+                    switch (indexProblema) {
+                        case 0:
+                            this.cnop = new PressureVessel();
+                            break;
+                        case 1:
+                            this.cnop = new TensionCompressionSpring();
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch (indexProblema) {
+                        case 0:
+                            this.cnop = new ProcessSynthesisYuan88();
+                            break;
+                        case 1:
+                            this.cnop = new DesignReinforcedConcreteBeam();
+                            break;
+                        case 2:
+                            this.cnop = new QuadraticallyConstrainedQuadraticProgram();
+                            break;
 
-    private void radioDefinidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radioDefinidaActionPerformed
-        ParameterCalibration cf = new ParameterCalibration(this, true, this);
-        cf.setVisible(true);
-    }//GEN-LAST:event_radioDefinidaActionPerformed
-
-    private void radioRecomendadaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radioRecomendadaActionPerformed
-        if (this.problema != null) {
-            this.mostrarConfiguracionRecomendada(this.problema.getRecommendedSetting());
-        }else {
-            JOptionPane.showMessageDialog(null, "No ha seleccionado un problema de optimización.","No hay selección",JOptionPane.WARNING_MESSAGE);
-        }
-    }//GEN-LAST:event_radioRecomendadaActionPerformed
-
-    private void boxProblemaOptimizacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boxProblemaOptimizacionActionPerformed
-       
-        int indexProblema = 0;
-        indexProblema = this.boxProblemaOptimizacion.getSelectedIndex();
-
-        switch(this.posicion){
-            case 1:
-            switch(indexProblema){
-                case 1: this.problema = new PressureVessel();           break;
-                case 2: this.problema = new TensionCompressionSpring(); break;
-                default:
-                this.limpiarProblemaOptimizacion();
+                    }
+                    break;
+                case 2:
+                    switch (indexProblema) {
+                        case 0:
+                            this.cnop = new G01_CEC2006();
+                            break;
+                        case 1:
+                            this.cnop = new G02_CEC2006();
+                            break;
+                        case 2:
+                            this.cnop = new G03_CEC2006();
+                            break;
+                        case 3:
+                            this.cnop = new G04_CEC2006();
+                            break;
+                        case 4:
+                            this.cnop = new G05_CEC2006();
+                            break;
+                        case 5:
+                            this.cnop = new G06_CEC2006();
+                            break;
+                        case 6:
+                            this.cnop = new G07_CEC2006();
+                            break;
+                        case 7:
+                            this.cnop = new G08_CEC2006();
+                            break;
+                        case 8:
+                            this.cnop = new G09_CEC2006();
+                            break;
+                        case 9:
+                            this.cnop = new G10_CEC2006();
+                            break;
+                        case 10:
+                            this.cnop = new G11_CEC2006();
+                            break;
+                        case 11:
+                            this.cnop = new G12_CEC2006();
+                            break;
+                        case 12:
+                            this.cnop = new G13_CEC2006();
+                            break;
+                        case 13:
+                            this.cnop = new G15_CEC2006();
+                            break;
+                        case 14:
+                            this.cnop = new G17_CEC2006();
+                            break;
+                        case 15:
+                            this.cnop = new G18_CEC2006();
+                            break;
+                        case 16:
+                            this.cnop = new G21_CEC2006();
+                            break;
+                        case 17:
+                            this.cnop = new G22_CEC2006();
+                            break;
+                        case 18:
+                            this.cnop = new G23_CEC2006();
+                            break;
+                        case 19:
+                            this.cnop = new G24_CEC2006();
+                            break;
+                    }
+                    break;
             }
-            break;
-            case 2:
-            switch(indexProblema){
-                case 1: this.problema = new ProcessSynthesisMINLP();                    break;
-                case 2: this.problema = new DesignReinforcedConcreteBeam();             break;
-                case 3: this.problema = new QuadraticallyConstrainedQuadraticProgram(); break;
-                default: this.limpiarProblemaOptimizacion();
-
+            if (!this.radioDefinida.isSelected()) {
+                this.limpiarConfiguracion();
             }
-            break;
-            case 3:
-            switch(indexProblema){
-                case 1: this.problema = new G01_CEC2006(); break;
-                case 2: this.problema = new G02_CEC2006(); break;
-                case 3: this.problema = new G03_CEC2006(); break;
-                case 4: this.problema = new G04_CEC2006(); break;
-                case 5: this.problema = new G05_CEC2006(); break;
-                case 6: this.problema = new G06_CEC2006(); break;
-                case 7: this.problema = new G07_CEC2006(); break;
-                case 8: this.problema = new G08_CEC2006(); break;
-                case 9: this.problema = new G09_CEC2006(); break;
-                case 10: this.problema = new G10_CEC2006(); break;
-                case 11: this.problema = new G11_CEC2006(); break;
-                case 12: this.problema = new G12_CEC2006(); break;
-                case 13: this.problema = new G13_CEC2006(); break;
-                //case 14: this.problema = new G14_CEC2006(); break;
-                case 15: this.problema = new G15_CEC2006(); break;
-                case 16: this.problema = new G17_CEC2006(); break;
-                case 17: this.problema = new G18_CEC2006(); break;
-                case 18: this.problema = new G21_CEC2006(); break;
-                case 19: this.problema = new G22_CEC2006(); break;
-                case 20: this.problema = new G23_CEC2006(); break;
-                case 21: this.problema = new G24_CEC2006(); break;
-                default:
-                this.limpiarProblemaOptimizacion();
 
-            }
-            break;
-            case 4:
-                switch(indexProblema){
-                    case 1: //this.problema = new C01_CEC2010(); break;
-                }
-                
-                break;
-
+            this.radioRecomendada.doClick();
+            this.mostrarProblemaOptimizacion();
         }
-        if (!this.radioDefinida.isSelected()) {
-            this.limpiarConfiguracion();
-        }
+    }//GEN-LAST:event_boxCnopsActionPerformed
 
-        if (indexProblema > 0) {
-            System.out.println(this.problema.getNameProblem());
-            this.mostrarProblemaOptimizacion(this.problema);
-                        if (this.problema != null) {
-                            this.radioRecomendada.doClick();
-                            this.btnStart.setEnabled(true);
-                        }                        
-        }
 
-    }//GEN-LAST:event_boxProblemaOptimizacionActionPerformed
-      
-  
-    private void boxAreaEstudioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boxAreaEstudioActionPerformed
-        this.posicion = this.boxAreaEstudio.getSelectedIndex();
-        this.cargarProblemaOptimizacion(this.posicion);
-    }//GEN-LAST:event_boxAreaEstudioActionPerformed
+    private void boxStudyAreaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_boxStudyAreaActionPerformed
+        this.indexSelect = this.boxStudyArea.getSelectedIndex();
+        this.showCNOPs(this.indexSelect);
+
+    }//GEN-LAST:event_boxStudyAreaActionPerformed
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        
-        this.execution = Integer.parseInt(this.spinnerExecution.getValue().toString());        
-        
-        this.lblRunning.setForeground(Color.BLACK);
-        this.resultsQuick.setForeground(Color.BLACK);
-        this.lblRunning.setText("Please wait: "+ execution +" independent executions..."); 
-        
-        this.resultsQuick.setText("-------------- We started! --------------"
-                                            + "\n" +this.problema.getNameProblem()
-                    +           "\n-----------------------------------------\n");
-        
-        
-        h1 = new Thread(this);
-        h1.start(); 
-        
-        iniciarProgreso();
-        
-        
-        this.btnStop.setEnabled(true);
-        this.btnStart.setEnabled(false);
-        this.btnResults.setEnabled(false);
-        this.btnCleaner.setEnabled(false);
+
+        String sb = txtBacterias.getText();
+        String step = txtTamanoPaso.getText();
+        String nc = txtCiclosQuimiotaxis.getText();
+        String scalin = txtFactorEscalamiento.getText();
+        String br = txtBacteriasReproducir.getText();
+        String fre = txtFrecuenciaReproduccion.getText();
+        String eva = txtNumeroEvaluaciones.getText();
+
+        if (!(sb.isBlank() || step.isBlank() || nc.isBlank() || scalin.isBlank() || br.isBlank() || fre.isBlank() || eva.isBlank())) {
+
+            this.tsmbfoa = new TSMBFOA(cnop, false);
+
+            this.execution = Integer.parseInt(this.spinnerExecution.getValue().toString());
+
+            this.lblRunning.setForeground(Color.BLACK);
+            this.resultsQuick.setForeground(Color.BLACK);
+            this.lblRunning.setText("Please wait: " + execution + " independent executions...");
+
+            this.resultsQuick.setText("-------------- We started! --------------"
+                    + "\n" + this.cnop.getNameProblem()
+                    + "\n-----------------------------------------\n");
+
+            h1 = new Thread(this);
+            h1.start();
+
+            iniciarProgreso();
+
+            this.btnStop.setEnabled(true);
+            this.btnStart.setEnabled(false);
+            this.btnResults.setEnabled(false);
+        } else {
+            JOptionPane.showMessageDialog(null, "Some fields are empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            this.radioRecomendada.doClick();
+        }
+
     }//GEN-LAST:event_btnStartActionPerformed
 
-    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
-        this.btnCleaner.doClick();
-    }//GEN-LAST:event_jMenuItem2ActionPerformed
-
+    @SuppressWarnings("deprecation")
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        
+
         int index = JOptionPane.showConfirmDialog(this, "Do you really want to cancel the execution?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-        
+
         if (index == 0) {
-            
+
             h1.stop();
             tiempo.stop();
-            
+
             progreso.setForeground(Color.RED);
-            
+
             this.btnStop.setEnabled(false);
             this.btnStart.setEnabled(true);
-            this.btnCleaner.setEnabled(true);
-            
+
             this.lblRunning.setForeground(new Color(255, 0, 0));
             this.lblRunning.setText("Cancelled");
-            
+
             this.resultsQuick.setForeground(Color.RED);
             this.resultsQuick.setText("-------------- Results --------------"
-                                            + "\nOperation cancelled"
-                    +               "\n-------------------------------------");
-            
+                    + "\nOperation cancelled"
+                    + "\n-------------------------------------");
+
         }
-        
-        
-        
+
     }//GEN-LAST:event_btnStopActionPerformed
 
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
@@ -1016,16 +1042,75 @@ public class MainUI extends JFrame implements Runnable{
         About about = new About(this, true);
         about.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
-    
+
+    private void radioRecomendadaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radioRecomendadaActionPerformed
+        this.mostrarConfiguracionRecomendada();
+    }//GEN-LAST:event_radioRecomendadaActionPerformed
+
+    private void radioDefinidaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radioDefinidaActionPerformed
+        limpiarConfiguracion();
+    }//GEN-LAST:event_radioDefinidaActionPerformed
+
+    private void txtBacteriasKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBacteriasKeyTyped
+        onlyNumbers(evt, 3, txtBacterias, false);
+    }//GEN-LAST:event_txtBacteriasKeyTyped
+
+    private void txtTamanoPasoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTamanoPasoKeyTyped
+        onlyNumbers(evt, 7, txtTamanoPaso, true);
+    }//GEN-LAST:event_txtTamanoPasoKeyTyped
+
+    private void txtCiclosQuimiotaxisKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCiclosQuimiotaxisKeyTyped
+        onlyNumbers(evt, 3, txtCiclosQuimiotaxis, false);
+    }//GEN-LAST:event_txtCiclosQuimiotaxisKeyTyped
+
+    private void txtFactorEscalamientoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFactorEscalamientoKeyTyped
+        onlyNumbers(evt, 7, txtFactorEscalamiento, true);
+    }//GEN-LAST:event_txtFactorEscalamientoKeyTyped
+
+    private void txtBacteriasReproducirKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBacteriasReproducirKeyTyped
+        onlyNumbers(evt, 3, txtBacteriasReproducir, false);
+    }//GEN-LAST:event_txtBacteriasReproducirKeyTyped
+
+    private void txtNumeroEvaluacionesKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNumeroEvaluacionesKeyTyped
+        onlyNumbers(evt, 6, txtNumeroEvaluaciones, false);
+    }//GEN-LAST:event_txtNumeroEvaluacionesKeyTyped
+
+    private void txtFrecuenciaReproduccionKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFrecuenciaReproduccionKeyTyped
+        onlyNumbers(evt, 3, txtFrecuenciaReproduccion, false);
+    }//GEN-LAST:event_txtFrecuenciaReproduccionKeyTyped
+
+    private void onlyNumbers(KeyEvent evt, int sizeText, JTextField field, boolean decimal) {
+        int key = evt.getKeyChar();
+
+        // Verificar si el carácter ingresado es un número (0-9) o un punto (si decimal es verdadero)
+        boolean numeros = (decimal) ? (key >= 48 && key <= 57 || key == 46) : (key >= 48 && key <= 57);
+
+        // Si el carácter ingresado no es un número válido, consumir el evento para cancelar la entrada
+        if (!numeros) {
+            evt.consume();
+        }
+
+        // Verificar si el campo de texto ha alcanzado el tamaño máximo permitido
+        if (field.getText().trim().length() == sizeText) {
+            evt.consume();
+        }
+
+        // Si decimal es verdadero, verificar si el campo de texto ya contiene un punto y se intenta ingresar otro
+        if (decimal) {
+            if (field.getText().contains(".") && key == 46) {
+                evt.consume();
+            }
+        }
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox boxAreaEstudio;
-    private javax.swing.JComboBox boxProblemaOptimizacion;
-    private javax.swing.JButton btnCleaner;
+    private javax.swing.JComboBox boxCnops;
+    private javax.swing.JComboBox boxStudyArea;
     private javax.swing.JButton btnResults;
     private javax.swing.JButton btnStart;
     private javax.swing.JButton btnStop;
     private javax.swing.ButtonGroup grupoDefinidoParametro;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
@@ -1050,7 +1135,6 @@ public class MainUI extends JFrame implements Runnable{
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JPanel jPanel1;
@@ -1065,9 +1149,6 @@ public class MainUI extends JFrame implements Runnable{
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lblRunning;
     private javax.swing.JProgressBar progreso;
@@ -1090,137 +1171,105 @@ public class MainUI extends JFrame implements Runnable{
     private javax.swing.JTextField txtVariables;
     // End of variables declaration//GEN-END:variables
 
-
-    private void cargarProblemaOptimizacion(int posicion){
-        this.boxProblemaOptimizacion.removeAllItems();
-        this.boxProblemaOptimizacion.addItem("");
-        this.boxProblemaOptimizacion.setEnabled(true);        
-        switch(posicion){           
-            case 1:                
-                this.boxProblemaOptimizacion.addItem("Pressure Vessel");
-                this.boxProblemaOptimizacion.addItem("Tension/compression spring");                
+    @SuppressWarnings("unchecked")
+    private void showCNOPs(int indexSelect) {
+        this.boxCnops.setEnabled(true);
+        this.boxCnops.removeAllItems();
+        switch (indexSelect) {
+            case 0:  // FOR engineering          
+                this.boxCnops.addItem("Pressure Vessel");
+                this.boxCnops.addItem("Tension/compression spring");
                 break;
-            case 2:                
-                this.boxProblemaOptimizacion.addItem("Process synthesis MINLP");                
-                this.boxProblemaOptimizacion.addItem("Design of a reinforced concrete beam");
-                this.boxProblemaOptimizacion.addItem("Quadratically constrained quadratic program");
+            case 1: //FOR CHEMISTRY           
+                this.boxCnops.addItem("Process synthesis MINLP");
+                this.boxCnops.addItem("Design of a reinforced concrete beam");
+                this.boxCnops.addItem("Quadratically constrained quadratic program");
                 break;
-            case 3:                
-                for (int i = 0; i < this.nombresCECC2006.length; i++) {                    
-                    this.boxProblemaOptimizacion.addItem(this.nombresCECC2006[i]);
-                }                               
+            case 2:
+                this.boxCnops.addItem("G01");
+                this.boxCnops.addItem("G02");
+                this.boxCnops.addItem("G03");
+                this.boxCnops.addItem("G04");
+                this.boxCnops.addItem("G05");
+                this.boxCnops.addItem("G06");
+                this.boxCnops.addItem("G07");
+                this.boxCnops.addItem("G08");
+                this.boxCnops.addItem("G09");
+                this.boxCnops.addItem("G10");
+                this.boxCnops.addItem("G11");
+                this.boxCnops.addItem("G12");
+                this.boxCnops.addItem("G13");
+                this.boxCnops.addItem("G15");
+                this.boxCnops.addItem("G17");
+                this.boxCnops.addItem("G18");
+                this.boxCnops.addItem("G21");
+                this.boxCnops.addItem("G22");
+                this.boxCnops.addItem("G23");
+                this.boxCnops.addItem("G24");
                 break;
-//            case 4:
-//                for (int i = 0; i < this.nombresCECC2010.length; i++) {                    
-//                    this.boxProblemaOptimizacion.addItem(this.nombresCECC2010[i]);
-//                }
-//                break;
-            case 4:
-                this.boxProblemaOptimizacion.setEnabled(false);
+            case 3:
+                this.boxCnops.setEnabled(false);
                 InputOP ip = new InputOP(this, true, this);
                 ip.setVisible(true);
-                
-                this.fillFields();
-                                                                
+                this.mostrarProblemaOptimizacion();
                 break;
-                default: 
-                    if (!this.radioDefinida.isSelected()) {
-                        this.limpiarConfiguracion();
-                    }
-                    
-                         this.limpiarProblemaOptimizacion();
-                         this.boxProblemaOptimizacion.setEnabled(false);
-        }
-        
-    }
-    
-     private void fillFields(){
 
-            
-            
-            if (this.problema != null) {
-                System.out.println(this.problema.getNameProblem());
-                this.mostrarProblemaOptimizacion(this.problema);
-                this.radioRecomendada.setEnabled(false);
-                this.radioDefinida.doClick();
-                this.btnStart.setEnabled(true);
-            }else this.btnCleaner.doClick();
-    }
-    
-    public void setNewProblem(Problem problem){
-        this.problema = problem;
-    }
-    
-    private void generarNombreCEC2006(){
-        int contador = 0;
-        for (int i = 1; i <= 24; i++) {                    
-            if (i != 16 && i != 19 && i != 20) {                        
-                this.nombresCECC2006[contador] = ((i < 10 ?"G0":"G") 
-                        +  i + " CEC2006");  
-                contador++;
-            }                 
         }
+
     }
-    
-    private void generarNombreCEC2010(){        
-        for (int i = 1; i <= 18; i++) {                                                       
-                this.nombresCECC2010[i-1] = ((i < 10 ?"C0":"C") 
-                        +  i + " CEC2010");                  
-                            
-        }
-    }
-    
-    public void mostrarProblemaOptimizacion(Problem Problema){
+
+    public void mostrarProblemaOptimizacion() {
         this.texRangoVariable.setText("");
         this.texRestricciones.setText("");
-        
-        this.txtNombre.setText(problema.getNameProblem());
-        this.txtValorConocido.setText("" + problema.getBestKnownValue());
-        this.texFuncion.setText("f(x) = " + problema.getFunction());
-        this.txtVariables.setText(Arrays.toString(problema.getOrderVariables()));  
-        
-        String[][] obj = problema.getConstraintsInequality();        
-        
+
+        this.txtNombre.setText(this.cnop.getNameProblem());
+        this.txtValorConocido.setText("" + this.cnop.getBestKnownValue());
+        this.texFuncion.setText("f(x) = " + this.cnop.getFunction());
+        this.txtVariables.setText(this.cnop.getOrderVariables().toString());
+
+        String[][] obj = this.cnop.getConstraintsInequality();
+
         if (obj != null) {
             for (int i = 0; i < obj.length; i++) {
-                this.texRestricciones.append("g(" + (i+1) + ") = " 
-                        + obj[i][0] + " " + obj[i][2] + " " + obj[i][1] + "\n");
-                
+                this.texRestricciones.append("g(" + (i + 1) + ") = "
+                        + obj[i][0] + " " + obj[i][1] + " " + obj[i][2] + "\n");
+
             }
         }
         obj = null;
-        obj = problema.getConstraintsEquality();
-        
+        obj = this.cnop.getConstraintsEquality();
+
         if (obj != null) {
             for (int i = 0; i < obj.length; i++) {
-                this.texRestricciones.append("h(" + (i+1) + ") = " 
-                        + obj[i][0] + " " + obj[i][2] + " " + obj[i][1] + "\n");
+                this.texRestricciones.append("h(" + (i + 1) + ") = "
+                        + obj[i][0] + " " + obj[i][1] + " " + obj[i][2] + "\n");
             }
         }
-        double[][] rangos = problema.getRankVariable();
-        
+        double[][] rangos = this.cnop.getVariableRange();
+
         if (rangos != null) {
             for (int i = 0; i < rangos.length; i++) {
-                this.texRangoVariable.append(problema.getOrderVariables()[i]
-                        +" = [" + rangos[i][0] +"," + rangos[i][1] + "]\t");                
+                this.texRangoVariable.append(this.cnop.getOrderVariables().get(i)
+                        + " = [" + rangos[i][0] + "," + rangos[i][1] + "]\t");
             }
-        }           
+        }
     }
-    
-    
-    public void mostrarConfiguracionRecomendada(Configurator configuracion){
-        NumberFormat nf = NumberFormat.getInstance();
-        nf.setMinimumFractionDigits(8);
-        this.txtBacterias.setText("" + configuracion.getSb());
-        this.txtTamanoPaso.setText("" + nf.format(configuracion.getStepSize()));
-        this.txtCiclosQuimiotaxis.setText("" + configuracion.getNc());
-        this.txtFactorEscalamiento.setText("" + configuracion.getScalingFactor());
-        this.txtBacteriasReproducir.setText("" + configuracion.getBacteriaReproduce());
-        this.txtFrecuenciaReproduccion.setText("" + configuracion.getRepcycle());
-        this.txtNumeroEvaluaciones.setText("" + configuracion.getEvaluations());
+
+    public void setNewCNOP(CNOP cnop) {
+        this.cnop = cnop;
     }
-    
-    public void limpiarConfiguracion(){        
+
+    public void mostrarConfiguracionRecomendada() {
+        this.txtBacterias.setText("14");
+        this.txtTamanoPaso.setText("0.0005");
+        this.txtCiclosQuimiotaxis.setText("7");
+        this.txtFactorEscalamiento.setText("1.95");
+        this.txtBacteriasReproducir.setText("1");
+        this.txtFrecuenciaReproduccion.setText("100");
+        this.txtNumeroEvaluaciones.setText("20000");
+    }
+
+    public void limpiarConfiguracion() {
         this.txtBacterias.setText("");
         this.txtTamanoPaso.setText("");
         this.txtCiclosQuimiotaxis.setText("");
@@ -1229,118 +1278,111 @@ public class MainUI extends JFrame implements Runnable{
         this.txtFrecuenciaReproduccion.setText("");
         this.txtNumeroEvaluaciones.setText("");
     }
-    
-    public void limpiarProblemaOptimizacion(){
-        this.btnStart.setEnabled(false);
+
+    public void limpiarProblemaOptimizacion() {
         this.radioRecomendada.setEnabled(true);
-        this.problema = null;
         this.texRangoVariable.setText("");
-        this.texRestricciones.setText("");        
+        this.texRestricciones.setText("");
         this.txtNombre.setText("");
         this.txtValorConocido.setText("");
         this.texFuncion.setText("");
-        this.txtVariables.setText("");                  
+        this.txtVariables.setText("");
     }
-    
-    public void setSettingParameter(){
-        
-        this.configuracionAuxiliar = new Configurator();
 
-            int sb = Integer.parseInt(this.txtBacterias.getText());
-            double stepSize = Double.parseDouble(this.txtTamanoPaso.getText());
-            int nc = Integer.parseInt(this.txtCiclosQuimiotaxis.getText());
-            double scalingFactor = Double.parseDouble(this.txtFactorEscalamiento.getText());
-            int bacteriaReproduce = Integer.parseInt(this.txtBacteriasReproducir.getText());
-            int repcycle = Integer.parseInt(this.txtFrecuenciaReproduccion.getText());
-            int evaluations = Integer.parseInt(this.txtNumeroEvaluaciones.getText());
+    public void setSettingParameter() {
 
-            this.configuracionAuxiliar.setSb(sb);
-            this.configuracionAuxiliar.setStepSize(stepSize);
-            this.configuracionAuxiliar.setNc(nc);
-            this.configuracionAuxiliar.setScalingFactor(scalingFactor);
-            this.configuracionAuxiliar.setBacteriaReproduce(bacteriaReproduce);
-            this.configuracionAuxiliar.setRepcycle(repcycle);
-            this.configuracionAuxiliar.setEvaluations(evaluations);
-    }          
+        int sb = Integer.parseInt(this.txtBacterias.getText());
+        double stepSize = Double.parseDouble(this.txtTamanoPaso.getText());
+        int nc = Integer.parseInt(this.txtCiclosQuimiotaxis.getText());
+        double scalingFactor = Double.parseDouble(this.txtFactorEscalamiento.getText());
+        int bacteriaReproduce = Integer.parseInt(this.txtBacteriasReproducir.getText());
+        int repcycle = Integer.parseInt(this.txtFrecuenciaReproduccion.getText());
+        int evaluations = Integer.parseInt(this.txtNumeroEvaluaciones.getText());
+
+        this.tsmbfoa.setSb(sb);
+        this.tsmbfoa.setStepSize(stepSize);
+        this.tsmbfoa.setNc(nc);
+        this.tsmbfoa.setScalingFactor(scalingFactor);
+        this.tsmbfoa.setBacteriaReproduce(bacteriaReproduce);
+        this.tsmbfoa.setRepcycle(repcycle);
+        this.tsmbfoa.setEvaluations(evaluations);
+    }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void run() {
-        
-        
-            Thread ct = Thread.currentThread();
-            
-            while (ct == h1) {    
-                this.toast = new Toast("We're done!", this.btnResults.getX(), this.btnResults.getY());
-                this.setSettingParameter();                 
-                problema.setExecutions(execution); 
-                
-                //this.problema.
-                RunTsmbfoa run = new RunTsmbfoa();
-                run.run(this.problema, this.configuracionAuxiliar, false, false);   
-                
-                                
-                this.lblRunning.setForeground(new Color(0, 0, 255));                
-                this.lblRunning.setText("Successful execution (total time: "+ this.problema.getTimeSeconds() +" seconds)");
-                
-                this.btnCleaner.setEnabled(true);
-                this.btnStop.setEnabled(false);
-                this.btnStart.setEnabled(true);
-                this.btnResults.setEnabled(true);
-                
-                if (this.progreso.getValue() < 100) {
-                    this.progreso.setValue(100);
-                }
-                
-                int indexAux = this.problema.getBestResults()[0].length-1;
-                double svrAux = -1;
-                
-                for (int i = 0; i < this.problema.getBestResults().length; i++) {                                                            
-                    if (this.problema.getStatistic()[0] == this.problema.getBestResults()[i][indexAux-1]) {
-                        svrAux = this.problema.getBestResults()[i][indexAux];
-                    }
-                }
-                
-                if (svrAux > 0) {
-                    this.resultsQuick.setForeground(Color.red);
-                }                                               
-                
-                this.resultsQuick.setText("-------------- We started! --------------"
-                                            + "\n" +this.problema.getNameProblem()
-                                            + "\nSuccessful execution "
-                                            + "\n(total time: "               + this.problema.getTimeSeconds() +" seconds)"
-                                            + "\nExecution: "                 + this.problema.getExecutions()                                            
-                                            + "\nBest value:                " + this.problema.getStatistic()[0]
-                                            + "\nConstraints violation sum: " + svrAux                                            
-                    +           "\n-----------------------------------------\n");                
-                tiempo.stop(); 
-                this.toast.showtoast();
-                h1.stop();                
-                
+
+        Thread ct = Thread.currentThread();
+
+        while (ct == h1) {
+            this.toast = new Toast("We're done!", this.btnResults.getX(), this.btnResults.getY());
+            this.setSettingParameter();
+            tsmbfoa.setExecutions(execution);
+
+            tsmbfoa.run();
+
+            this.lblRunning.setForeground(new Color(0, 0, 255));
+            this.lblRunning.setText("Successful execution (total time: " + this.tsmbfoa.getTimeSeconds() + " seconds)");
+
+            this.btnStop.setEnabled(false);
+            this.btnStart.setEnabled(true);
+            this.btnResults.setEnabled(true);
+
+            if (this.progreso.getValue() < 100) {
+                this.progreso.setValue(100);
             }
 
+            int indexAux = this.tsmbfoa.getBestResults()[0].length - 1;
+            double svrAux = -1;
+
+            for (int i = 0; i < this.tsmbfoa.getBestResults().length; i++) {
+                if (this.tsmbfoa.getStatistic()[0] == this.tsmbfoa.getBestResults()[i][indexAux - 1]) {
+                    svrAux = this.tsmbfoa.getBestResults()[i][indexAux];
+                }
+            }
+
+            if (svrAux > 0) {
+                this.resultsQuick.setForeground(Color.red);
+            }
+
+            this.resultsQuick.setText("-------------- We started! --------------"
+                    + "\n" + this.cnop.getNameProblem()
+                    + "\nSuccessful execution "
+                    + "\n(total time: " + this.tsmbfoa.getTimeSeconds() + " seconds)"
+                    + "\nExecution: " + this.tsmbfoa.getExecutions()
+                    + "\nBest value:                " + this.tsmbfoa.getStatistic()[0]
+                    + "\nConstraints violation sum: " + svrAux
+                    + "\n-----------------------------------------\n");
+            tiempo.stop();
+            this.toast.showtoast();
+            h1.stop();
+
+        }
+
     }
-    
-    public void iniciarProgreso(){ 
+
+    public void iniciarProgreso() {
         count = -1;
-         progreso.setValue(0);
-         progreso.setStringPainted(true);
-         progreso.setForeground(Color.BLUE);
-         tiempo = new Timer(20, new TimerListener());                  
-         tiempo.start();
+        progreso.setValue(0);
+        progreso.setStringPainted(true);
+        progreso.setForeground(Color.BLUE);
+        tiempo = new Timer(20, new TimerListener());
+        tiempo.start();
     }
-    
-    class TimerListener implements ActionListener{
+
+    class TimerListener implements ActionListener {
+
         @Override
-        public void actionPerformed(ActionEvent e) {      
+        public void actionPerformed(ActionEvent e) {
             count++;
-            if (problema.getAdvance() != progreso.getValue()) {
-                progreso.setValue(problema.getAdvance());
-            } 
+            if (tsmbfoa.getAdvance() != progreso.getValue()) {
+                progreso.setValue(tsmbfoa.getAdvance());
+            }
             if (count == 15) {
                 resultsQuick.append("o");
-                count=0;
+                count = 0;
             }
-            
+
         }
     }
 

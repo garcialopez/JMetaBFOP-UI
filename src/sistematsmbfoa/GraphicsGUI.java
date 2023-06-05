@@ -5,12 +5,14 @@
  */
 package sistematsmbfoa;
 
-import com.adriangarcia.metaheuristics.tsmbfoa.Problem; 
+import com.garcialopez.metaheuristic.tsmbfoa.TSMBFOA;
+import com.garcialopez.optimizationmodel.CNOP;
 import java.awt.BasicStroke;
 import java.awt.Color; 
 import java.awt.Shape;
 import java.text.DecimalFormat; 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -33,24 +35,18 @@ import org.jfree.util.ShapeUtilities;
  *
  * @author 
  */
-public class GraphicsGUI extends javax.swing.JDialog {
+public final class GraphicsGUI extends javax.swing.JDialog {
 
-    Problem problem;    
-    
-    public GraphicsGUI(java.awt.Frame parent, boolean modal, Problem problem) {
+    CNOP cnop;    
+    TSMBFOA tsmbfoa;
+    public GraphicsGUI(java.awt.Frame parent, boolean modal, CNOP cnop, TSMBFOA tsmbfoa) {
         super(parent, modal);
         initComponents();
         this.setLocationRelativeTo(null);
-        this.problem = problem;
+        this.cnop = cnop;
+        this.tsmbfoa = tsmbfoa;
         
         this.showGraphics0();
-        
-//        if (problem.getExecutions() > 1 & problem.getBestKnownValue() > 0) {
-//            this.showGraphics1();
-//        } else {
-//        }
-        
-        
         this.showGraphics2();                                                   
         this.showBoxPlot();
                                 
@@ -67,109 +63,102 @@ public class GraphicsGUI extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jPanel1 = new javax.swing.JPanel();
-        graphics5 = new javax.swing.JPanel();
-        graphics3 = new javax.swing.JPanel();
-        graphics6 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        convergence = new javax.swing.JPanel();
+        disper = new javax.swing.JPanel();
+        boxplot = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Graphics");
 
-        graphics5.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
 
-        javax.swing.GroupLayout graphics5Layout = new javax.swing.GroupLayout(graphics5);
-        graphics5.setLayout(graphics5Layout);
-        graphics5Layout.setHorizontalGroup(
-            graphics5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 737, Short.MAX_VALUE)
+        convergence.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout convergenceLayout = new javax.swing.GroupLayout(convergence);
+        convergence.setLayout(convergenceLayout);
+        convergenceLayout.setHorizontalGroup(
+            convergenceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 775, Short.MAX_VALUE)
         );
-        graphics5Layout.setVerticalGroup(
-            graphics5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        convergenceLayout.setVerticalGroup(
+            convergenceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 436, Short.MAX_VALUE)
+        );
+
+        disper.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout disperLayout = new javax.swing.GroupLayout(disper);
+        disper.setLayout(disperLayout);
+        disperLayout.setHorizontalGroup(
+            disperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        disperLayout.setVerticalGroup(
+            disperLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 289, Short.MAX_VALUE)
+        );
+
+        boxplot.setBackground(new java.awt.Color(255, 255, 255));
+        boxplot.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        javax.swing.GroupLayout boxplotLayout = new javax.swing.GroupLayout(boxplot);
+        boxplot.setLayout(boxplotLayout);
+        boxplotLayout.setHorizontalGroup(
+            boxplotLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 549, Short.MAX_VALUE)
+        );
+        boxplotLayout.setVerticalGroup(
+            boxplotLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
 
-        graphics3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        javax.swing.GroupLayout graphics3Layout = new javax.swing.GroupLayout(graphics3);
-        graphics3.setLayout(graphics3Layout);
-        graphics3Layout.setHorizontalGroup(
-            graphics3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1309, Short.MAX_VALUE)
-        );
-        graphics3Layout.setVerticalGroup(
-            graphics3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 346, Short.MAX_VALUE)
-        );
-
-        graphics6.setBackground(new java.awt.Color(255, 255, 255));
-        graphics6.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        javax.swing.GroupLayout graphics6Layout = new javax.swing.GroupLayout(graphics6);
-        graphics6.setLayout(graphics6Layout);
-        graphics6Layout.setHorizontalGroup(
-            graphics6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        graphics6Layout.setVerticalGroup(
-            graphics6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 330, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(graphics3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(graphics5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(graphics6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(convergence, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(disper, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(boxplot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(graphics3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(graphics6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(graphics5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(boxplot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(convergence, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(disper, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(6, 6, 6)))
+                .addContainerGap())
         );
-
-        jScrollPane1.setViewportView(jPanel1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1362, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 723, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
        
-    
-    
-               
- 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel graphics3;
-    private javax.swing.JPanel graphics5;
-    private javax.swing.JPanel graphics6;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel boxplot;
+    private javax.swing.JPanel convergence;
+    private javax.swing.JPanel disper;
+    private javax.swing.JPanel jPanel2;
     // End of variables declaration//GEN-END:variables
     
     DefaultXYDataset dataset;
@@ -180,13 +169,11 @@ public class GraphicsGUI extends javax.swing.JDialog {
     
     public void showGraphics0(){                
         dataset = new DefaultXYDataset();        
-        dataset.addSeries("Best Values ", this.problem.getConvergenceMedia());       
+        dataset.addSeries("Best Values ", this.tsmbfoa.getConvergenceMedia());       
         
         chart = null;
         chart = ChartFactory.createXYLineChart(
-                "Independent median execution convergence"
-                //this.problem.getNameProblem()
-                  //"JMetaBFOP convergence for G09"
+                this.cnop.getNameProblem()
                 , "Evaluations"
                 , "Obj Function"
                 , dataset
@@ -201,7 +188,6 @@ public class GraphicsGUI extends javax.swing.JDialog {
         
         Shape cross = ShapeUtilities.createDiamond(1);
         renderer.setSeriesShape(0, cross);
-        //renderer.setSeriesShape(0, new Ellipse2D.Double(6/2-3, 6/2-3, 2*3, 2*3));
         
         renderer.setSeriesStroke(0, new BasicStroke(2));
         chart.getXYPlot().setRenderer(renderer);
@@ -210,41 +196,14 @@ public class GraphicsGUI extends javax.swing.JDialog {
         chartPane1 = new ChartPanel(chart);
         chart.getPlot().setBackgroundPaint( new Color(250, 250, 250) );
         
-        graph(graphics3, chartPane1);        
+        graph(convergence, chartPane1);        
     }
-    
-    public void showGraphics1(){                
-        dataset = new DefaultXYDataset();          
-                
-        dataset.addSeries("Best values ", this.problem.getConvergenceBestValue());       
-        
-        chart = null;
-        chart = ChartFactory.createXYLineChart(
-                "Convergence of the best value found"
-                , "Generations"
-                , "Obj Function"
-                , dataset
-                ,  PlotOrientation.VERTICAL, false, true, false);                  
-                 
-        ((NumberAxis) chart.getXYPlot().getRangeAxis()).setNumberFormatOverride(new DecimalFormat("#.###############"));                  
-         
-        plot = (XYPlot) chart.getPlot();                
-        renderer= (XYLineAndShapeRenderer) plot.getRenderer();         
-        renderer.setSeriesShapesVisible(0, true);
-        renderer.setSeriesPaint(0, Color.RED);
-        renderer.setSeriesStroke(0, new BasicStroke(1));
-        chart.getXYPlot().setRenderer(renderer);
-        
-        chartPane1 = new ChartPanel(chart);
-//        chartPane1.setDomainZoomable(false);
-//        chartPane1.setRangeZoomable(false); 
-        
-        //graph(graphics2, chartPane1);                
-    }
-    
+ 
+       
+
     public void showGraphics2(){                
         dataset = new DefaultXYDataset();
-        dataset.addSeries("Best values ", this.problem.getDataGraphicsBestResults());
+        dataset.addSeries("Best values ", this.tsmbfoa.getDataGraphicsBestResults());
                  
         chart = null;
         chart = ChartFactory.createXYLineChart(
@@ -254,10 +213,10 @@ public class GraphicsGUI extends javax.swing.JDialog {
                 , dataset
                 ,  PlotOrientation.VERTICAL, false, true, false);                  
          
-        if (this.problem.getStatistic()[0] == this.problem.getStatistic()[4]) {
-            chart.getXYPlot().getRangeAxis().setRange(this.problem.getStatistic()[0] - 0.00001, this.problem.getStatistic()[4] + 0.00001);                
+        if (this.tsmbfoa.getStatistic()[0] == this.tsmbfoa.getStatistic()[4]) {
+            chart.getXYPlot().getRangeAxis().setRange(this.tsmbfoa.getStatistic()[0] - 0.00001, this.tsmbfoa.getStatistic()[4] + 0.00001);                
         }else{
-            chart.getXYPlot().getRangeAxis().setRange(this.problem.getStatistic()[0], this.problem.getStatistic()[4]);
+            chart.getXYPlot().getRangeAxis().setRange(this.tsmbfoa.getStatistic()[0], this.tsmbfoa.getStatistic()[4]);
         }                                 
         
         ((NumberAxis) chart.getXYPlot().getRangeAxis()).setNumberFormatOverride(new DecimalFormat("#.###############"));                  
@@ -275,14 +234,14 @@ public class GraphicsGUI extends javax.swing.JDialog {
         chartPane1.setDomainZoomable(false);
         chartPane1.setRangeZoomable(false); 
         
-        graph(graphics5, chartPane1);               
+        graph(disper, chartPane1);               
     }
     
     public void showBoxPlot(){
         
-        ArrayList<Double> list = new ArrayList();
-        for (int i = 0; i < this.problem.getDataGraphicsBestResults()[0].length; i++) {
-            list.add(this.problem.getDataGraphicsBestResults()[1][i]);            
+        List<Double> list = new ArrayList<>();
+        for (int i = 0; i < this.tsmbfoa.getDataGraphicsBestResults()[0].length; i++) {
+            list.add(this.tsmbfoa.getDataGraphicsBestResults()[1][i]);            
         }                
         
         DefaultBoxAndWhiskerCategoryDataset data = new DefaultBoxAndWhiskerCategoryDataset();        
@@ -298,7 +257,7 @@ public class GraphicsGUI extends javax.swing.JDialog {
         re.setFillBox(true);
         re.setSeriesToolTipGenerator(1, new BoxAndWhiskerToolTipGenerator());
         re.setMeanVisible(false);
-        //re.setSeriesPaint(0, new Color( 255,204,0 ));              
+        re.setSeriesPaint(0, new Color(0, 0, 255, 64));              
         CategoryPlot plot1 = new CategoryPlot(data, xAxis, yAxis, re); 
         
                         
@@ -309,12 +268,38 @@ public class GraphicsGUI extends javax.swing.JDialog {
         chart.getPlot().setBackgroundPaint( new Color(250, 250, 250) );
         chart.setBackgroundPaint(Color.white);
 
-        graph(graphics6, chartPane1);
+        graph(boxplot, chartPane1);
     }
+   
+    
+
     
     private void graph(JPanel panel, ChartPanel chartPane){
         panel.add(chartPane);
         chartPane.setBounds(0, 0, panel.getWidth(), panel.getHeight());    
     }
+    
+    
+    
+ /**
+  * 
+        public void showGraphics1(){                
+        dataset = new DefaultXYDataset();          
+        dataset.addSeries("Best values ", this.tsmbfoa.getConvergence());       
+        chart = null;
+        chart = ChartFactory.createXYLineChart("Convergence of the best value found", "Generations", "Obj Function", dataset, PlotOrientation.VERTICAL, false, true, false);                  
+        ((NumberAxis) chart.getXYPlot().getRangeAxis()).setNumberFormatOverride(new DecimalFormat("#.###############"));                  
+        plot = (XYPlot) chart.getPlot();                
+        renderer= (XYLineAndShapeRenderer) plot.getRenderer();         
+        renderer.setSeriesShapesVisible(0, true);
+        renderer.setSeriesPaint(0, Color.RED);
+        renderer.setSeriesStroke(0, new BasicStroke(1));
+        chart.getXYPlot().setRenderer(renderer);
+        chartPane1 = new ChartPanel(chart);
+//        chartPane1.setDomainZoomable(false);
+//        chartPane1.setRangeZoomable(false); 
+        //graph(graphics2, chartPane1);                
+    }
+   */
     
 }
