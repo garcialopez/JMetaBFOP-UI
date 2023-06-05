@@ -952,6 +952,7 @@ public class Results extends javax.swing.JDialog {
             File folderToSave = fileChooser.getSelectedFile();
 
             String nameFile = (this.cnop.getNameProblem() + "-" + tsmbfoa.getExecutions() + "-iter" + ".csv");
+            nameFile = nameFile.replaceAll("[\\\\\\\\/:*?\\\"<>|]", "-");
             String filePath = folderToSave.getAbsolutePath() + File.separator + nameFile;
 
             try {
